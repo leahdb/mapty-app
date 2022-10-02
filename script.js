@@ -1,5 +1,49 @@
 "use strict";
 
+class Workout {
+  date = new Date();
+  id = (Date.now() + "").slice(-10);   //the id will be the last 10 characters of the string date
+
+  constructor(coords, distance, duration) {
+    this.coords = coords;         //array: [lat, lng]
+    this.distance = distance;     //in km
+    this.duration = duration;     //in min
+  }
+
+}
+
+class Running extends Workout {
+  type = "running";
+
+  constructor(coords, distance, duration, cadence) {
+    super(coords, distance, duration);
+    this.cadence = cadence;
+    this.calcPace();
+  }
+
+  calcPace() {
+    //in min/km
+    this.pace = this.duration / this.distance;
+    return this.pace;
+  }
+}
+
+class Cycling extends Workout {
+  type = "cycling";
+
+  constructor(coords, distance, duration, elevationGain) {
+    super(coords, distance, duration);
+    this.elevationGain = elevationGain;
+    this.calcSpeed();
+  }
+
+  calcSpeed() {
+    //in km/h
+    this.speed = this.distance / (this.duration / 60);
+    return this.speed;
+  }
+}
+
 const months = [
   "January",
   "February",
@@ -30,6 +74,7 @@ class App {
     this._getPosition(); //get the user's position
 
     form.addEventListener("submit", this._newWorkout.bind(this));
+    inputType.addEventListener("change", this._toggleElevationField);
   }
   _getPosition() {
     if (navigator.geolocation)
@@ -49,7 +94,7 @@ class App {
 
     const coords = [latitude, longitude];
 
-    this.#map = L.map('map').setView(coords, 13);
+    this.#map = L.map("map").setView(coords, 13);
 
     L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
       attribution:
@@ -64,6 +109,11 @@ class App {
     this.#mapEvent = mapE;
     form.classList.remove("hidden");
     inputDistance.focus();
+  }
+
+  _toggleElevationField() {
+    inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
+    inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
   }
 
   _newWorkout(e) {
