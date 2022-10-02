@@ -68,6 +68,8 @@ class App {
   constructor() {
     this._getPosition(); //get the user's position
 
+    this._getLocalStorage();   //get data from local storage
+
     form.addEventListener("submit", this._newWorkout.bind(this));
     inputType.addEventListener("change", this._toggleElevationField);
     containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
@@ -146,7 +148,7 @@ class App {
     if (type === "running") {
       const cadence = +inputCadence.value;
 
-      // Check if data is valid
+      //to check if the data is valid
       if (
         !validInputs(distance, duration, cadence) ||
         !allPositive(distance, duration, cadence)
@@ -175,6 +177,8 @@ class App {
     this._renderWorkout(workout);
 
     this._hideForm();
+
+    this._setLocalStorage();      //for all workouts
   }
 
   _renderWorkoutMarker(workout) {
@@ -263,7 +267,27 @@ class App {
         duration: 1,
       },
     });
+  }
 
+  _setLocalStorage() {
+    localStorage.setItem("workouts", JSON.stringify(this.#workouts));     //to convert object to string
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem("workouts"));
+
+    if (!data) return;
+
+    this.#workouts = data;
+
+    this.#workouts.forEach((work) => {
+      this._renderWorkout(work);
+    });
+  }
+
+  reset() {
+    localStorage.removeItem("workouts");
+    location.reload();
   }
 }
 
